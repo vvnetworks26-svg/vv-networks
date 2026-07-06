@@ -44,6 +44,7 @@ import PortfolioSection from "./components/portfolio";
 import ServicesSection from "./components/services";
 import PricingSection from "./components/pricing";
 import AboutSection from "./components/about";
+import ContactSection from "./components/contact";
 import { api } from "./lib/apiClient";
 import type { ChatMessage } from "./lib/apiClient";
 import { CaseStudy, ServiceItem, PricingTier } from "./types";
@@ -758,83 +759,11 @@ export default function App() {
         </section>
 
         {/* ══════════════════════════════════════════
-            PREMIUM CTA SECTION
+            CONTACT / CONVERSION
         ══════════════════════════════════════════ */}
-        <section className="max-w-7xl mx-auto px-6 sm:px-8 py-12 pb-24">
-          <ScrollReveal>
-            <div className="p-8 sm:p-16 bg-brand-navy rounded-[32px] text-white text-center relative overflow-hidden flex flex-col items-center justify-center space-y-6">
-
-              {/* Dot pattern */}
-              <div className="absolute inset-0 bg-dot-pattern opacity-10 pointer-events-none" aria-hidden="true" />
-
-              {/* Ambient glow */}
-              <motion.div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-indigo/25 rounded-full pointer-events-none"
-                style={{ filter: "blur(100px)" }}
-                animate={shouldReduce ? {} : { scale: [1, 1.1, 1], opacity: [0.2, 0.35, 0.2] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                aria-hidden="true"
-              />
-
-              {/* Floating particles */}
-              {!shouldReduce && [
-                { x: "15%", y: "20%", size: 3, delay: 0 },
-                { x: "80%", y: "30%", size: 2, delay: 1 },
-                { x: "25%", y: "70%", size: 2, delay: 2 },
-                { x: "70%", y: "75%", size: 3, delay: 1.5 },
-              ].map((p, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute rounded-full bg-white/20 pointer-events-none"
-                  style={{ left: p.x, top: p.y, width: p.size * 4, height: p.size * 4 }}
-                  animate={{ y: [-8, 8, -8], opacity: [0.3, 0.8, 0.3] }}
-                  transition={{ duration: 4, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
-                  aria-hidden="true"
-                />
-              ))}
-
-              <div className="relative z-10 flex flex-col items-center space-y-6">
-                <div className="inline-flex items-center gap-1.5 bg-white/10 px-3.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold backdrop-blur-sm border border-white/10">
-                  <motion.span
-                    animate={shouldReduce ? {} : { rotate: [0, 360] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-brand-violet" aria-hidden="true" />
-                  </motion.span>
-                  Limited Partner Allocations Open
-                </div>
-
-                <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight max-w-2xl">
-                  Grow your business on autopilot.
-                </h2>
-
-                <p className="text-sm text-brand-slate-300 leading-relaxed max-w-md mx-auto">
-                  Reserve a 15-minute founding-team demo. We'll map where AI can immediately eliminate your operational overhead and accelerate lead conversion.
-                </p>
-
-                <div className="flex flex-wrap gap-3 justify-center pt-2">
-                  <RippleButton
-                    variant="ghost"
-                    className="px-6 py-3.5 rounded-full text-xs text-brand-navy"
-                    onClick={() => setIsBookingOpen(true)}
-                    aria-label="Schedule a founding demo"
-                  >
-                    Schedule Founding Demo
-                    <ArrowRight className="w-4 h-4 text-brand-indigo" aria-hidden="true" />
-                  </RippleButton>
-                  <RippleButton
-                    variant="outline"
-                    className="px-6 py-3.5 rounded-full text-xs"
-                    onClick={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
-                    aria-label="Open LeadFlow widget"
-                  >
-                    Explore LeadFlow Live
-                  </RippleButton>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-        </section>
+        <ContactSection
+          onOpenChat={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+        />
 
       </main>
 
