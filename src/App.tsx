@@ -43,6 +43,7 @@ import LeadFlowExperience from "./components/leadflow-experience";
 import PortfolioSection from "./components/portfolio";
 import ServicesSection from "./components/services";
 import PricingSection from "./components/pricing";
+import AboutSection from "./components/about";
 import { api } from "./lib/apiClient";
 import type { ChatMessage } from "./lib/apiClient";
 import { CaseStudy, ServiceItem, PricingTier } from "./types";
@@ -681,108 +682,13 @@ export default function App() {
         />
 
         {/* ══════════════════════════════════════════
-            ABOUT / PHILOSOPHY
-        ══════════════════════════════════════════ */}
-        <section id="about" className="py-20 sm:py-32 max-w-7xl mx-auto px-6 sm:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <ScrollReveal className="lg:col-span-6 space-y-6">
-              <span className="text-[11px] font-bold text-brand-blue font-mono uppercase tracking-wider block">Studio Philosophy</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-brand-navy leading-tight">
-                Exceptional businesses are powered by software built for them.
-              </h2>
-              <p className="text-xs sm:text-sm text-brand-slate-500 leading-relaxed">
-                Generic templates and stitched-together no-code tools dilute your conversion rates and create security fragmentation. We build robust, first-principles React applications backed by AI infrastructure that gives you genuine operational control.
-              </p>
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="p-4 border border-brand-slate-100 rounded-xl bg-brand-slate-50/50">
-                  <span className="text-2xl font-black text-brand-blue font-mono">100%</span>
-                  <span className="text-xs font-bold text-brand-navy block mt-1">First-Principles Code</span>
-                  <span className="text-[10px] text-brand-slate-400 leading-relaxed block mt-0.5">No templates or builders. Every repository optimized from scratch.</span>
-                </div>
-                <div className="p-4 border border-brand-slate-100 rounded-xl bg-brand-slate-50/50">
-                  <span className="text-2xl font-black text-brand-violet font-mono">24/7</span>
-                  <span className="text-xs font-bold text-brand-navy block mt-1">Autonomous Lead Capture</span>
-                  <span className="text-[10px] text-brand-slate-400 leading-relaxed block mt-0.5">LeadFlow qualifies prospects while your team is offline.</span>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal className="lg:col-span-6" delay={0.15}>
-              <div className="border border-brand-slate-200 rounded-3xl p-8 bg-brand-slate-50/50 space-y-6">
-                <h4 className="font-bold text-lg text-brand-navy">Why work with VV Networks?</h4>
-                <div className="space-y-5">
-                  {[
-                    { title: "Performance is non-negotiable", desc: "Our visual designs are paired with perfect loading targets. You ship sites that pass Core Web Vitals comfortably." },
-                    { title: "Sovereign data ownership", desc: "All lead details and conversations are processed server-side and routed securely over encrypted SSL pipelines — never shared." },
-                    { title: "Direct senior team access", desc: "You work with the engineers and creative directors building your product — no account managers, no outsourcing." },
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex gap-4">
-                      <span className="w-6 h-6 rounded-full bg-brand-blue/10 text-brand-blue flex-shrink-0 flex items-center justify-center font-bold text-xs">
-                        {idx + 1}
-                      </span>
-                      <div>
-                        <h5 className="font-bold text-xs text-brand-navy">{item.title}</h5>
-                        <p className="text-xs text-brand-slate-500 mt-1 leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
-
         {/* ══════════════════════════════════════════
-            TESTIMONIALS — Coming Soon placeholder
+            ABOUT / COMPANY
         ══════════════════════════════════════════ */}
-        <section id="testimonials" className="py-20 sm:py-32 bg-brand-slate-50/50 border-y border-brand-slate-100">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 space-y-12">
-            <ScrollReveal>
-              <div className="max-w-2xl space-y-4 text-center mx-auto">
-                <span className="text-[11px] font-bold text-brand-blue font-mono uppercase tracking-wider block">Social Proof</span>
-                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-brand-navy">What our partners say.</h2>
-                <p className="text-sm text-brand-slate-500 leading-relaxed">
-                  Partner testimonials are being collected from our first cohort of clients.
-                </p>
-              </div>
-            </ScrollReveal>
-
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-3 gap-6" staggerDelay={0.1}>
-              {[0, 1, 2].map((i) => (
-                <StaggerItem key={i}>
-                  <div className="p-7 bg-white border border-brand-slate-200 rounded-2xl flex flex-col justify-between gap-6 h-full" aria-label="Testimonial placeholder">
-                    <div className="space-y-4">
-                      <div className="flex gap-1">
-                        {[0, 1, 2, 3, 4].map((s) => (
-                          <Star key={s} className="w-4 h-4 text-brand-slate-200 fill-brand-slate-200" aria-hidden="true" />
-                        ))}
-                      </div>
-                      <div className="space-y-2.5">
-                        <div className="h-3 bg-brand-slate-100 rounded-full w-full" aria-hidden="true" />
-                        <div className="h-3 bg-brand-slate-100 rounded-full w-5/6" aria-hidden="true" />
-                        <div className="h-3 bg-brand-slate-100 rounded-full w-4/6" aria-hidden="true" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className="h-3 bg-brand-slate-100 rounded-full w-3/4" aria-hidden="true" />
-                        <div className="h-3 bg-brand-slate-100 rounded-full w-1/2" aria-hidden="true" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 pt-4 border-t border-brand-slate-100">
-                      <div className="w-9 h-9 rounded-full bg-brand-slate-100" aria-hidden="true" />
-                      <div className="space-y-1.5">
-                        <div className="h-2.5 bg-brand-slate-100 rounded-full w-24" aria-hidden="true" />
-                        <div className="h-2 bg-brand-slate-100 rounded-full w-16" aria-hidden="true" />
-                      </div>
-                      <span className="ml-auto text-[10px] font-mono font-bold text-brand-slate-300 uppercase tracking-wider bg-brand-slate-50 border border-brand-slate-200 px-2 py-0.5 rounded">
-                        Coming Soon
-                      </span>
-                    </div>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
+        <AboutSection
+          onBookDemo={() => setIsBookingOpen(true)}
+          onOpenChat={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+        />
 
         {/* ══════════════════════════════════════════
             FAQ
