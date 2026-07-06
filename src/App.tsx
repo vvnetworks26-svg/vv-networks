@@ -1,38 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Sparkles,
   ArrowRight,
-  CheckCircle,
-  ChevronRight,
   Plus,
   Minus,
-  MessageSquare,
-  Send,
-  X,
-  Calendar,
-  Shield,
-  Cpu,
-  Code,
-  Layers,
-  Cloud,
-  ArrowUpRight,
   Check,
-  Users,
-  TrendingUp,
-  Clock,
-  Workflow,
   Heart,
-  ExternalLink,
   ChevronDown,
-  Zap,
   Globe,
-  Lock,
   BarChart3,
-  Star,
   Bot,
   Database,
   GitBranch,
   Monitor,
+  Zap,
+  Calendar,
+  Code,
+  Layers,
+  Cloud,
+  Workflow,
+  CheckCircle,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import InteractiveDashboard from "./components/InteractiveDashboard";
@@ -46,9 +34,6 @@ import PricingSection from "./components/pricing";
 import AboutSection from "./components/about";
 import ContactSection from "./components/contact";
 import { LeadFlowProvider, LeadFlowWidget, useLeadFlow } from "./components/leadflow-sdk";
-import { api } from "./lib/apiClient";
-import type { ChatMessage } from "./lib/apiClient";
-import { CaseStudy, ServiceItem, PricingTier } from "./types";
 
 /* ─────────────────────────────────────────────────────────
    Reusable primitive: ripple button
@@ -142,21 +127,13 @@ function AppInner() {
   const shouldReduce = useReducedMotion();
   const { openWidget } = useLeadFlow();
 
-  // Navigation & Interactive States
-  const [activeSection, setActiveSection] = useState("home");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
-
-  // FAQ Expanded States
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-
-  // Interactive Flow Selector
-  const [activeFlowStep, setActiveFlowStep] = useState(0);
-
-  // Header scroll state
   const [scrolled, setScrolled] = useState(false);
 
-  const triggerDashboardSync = () => setDashboardRefreshTrigger((prev) => prev + 1);
+  const triggerDashboardSync = useCallback(() =>
+    setDashboardRefreshTrigger((prev) => prev + 1), []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -164,14 +141,8 @@ function AppInner() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ── Data definitions ── */
-  const flowSteps = [
-    { num: "01", icon: Globe, title: "Visitor Arrives", desc: "A prospect lands on your site. Instead of a static form, they're greeted by a responsive, expert-level conversational agent." },
-    { num: "02", icon: Bot, title: "AI Converses", desc: "LeadFlow engages in real time — evaluating intent, handling multi-lingual questions, and extracting structured business context." },
-    { num: "03", icon: Zap, title: "Instant Qualification", desc: "The agent verifies qualification signals: revenue tier, company size, urgency. High-intent leads are flagged and prioritized immediately." },
-    { num: "04", icon: Calendar, title: "Auto Booking", desc: "Qualified prospects are prompted to reserve an open slot directly within the widget — synced live to your team's calendar." },
-    { num: "05", icon: BarChart3, title: "Pipeline Sync", desc: "Clean contact data, conversation summaries, and meeting times populate your Business OS dashboard and push to your CRM via webhooks." },
-  ];
+  /* ── Animated headline words ── */
+  const headlineWords = ["Engineering", "Intelligence", "for Service", "Growth."];
 
   const faqs = [
     {
@@ -199,20 +170,6 @@ function AppInner() {
       a: "Click 'Book Team Demo' to reserve a 15-minute founding-team screen-share. We'll map your operational bottlenecks, outline a tailored software strategy, and deliver a transparent project scope for your review.",
     },
   ];
-
-  const techStack = [
-    { name: "React", icon: Monitor, color: "text-cyan-500", bg: "bg-cyan-50" },
-    { name: "TypeScript", icon: Code, color: "text-blue-600", bg: "bg-blue-50" },
-    { name: "Node.js", icon: Layers, color: "text-green-600", bg: "bg-green-50" },
-    { name: "MongoDB", icon: Database, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { name: "OpenAI / Gemini", icon: Bot, color: "text-violet-600", bg: "bg-violet-50" },
-    { name: "Docker", icon: Cloud, color: "text-sky-600", bg: "bg-sky-50" },
-    { name: "AWS / GCP", icon: Globe, color: "text-orange-500", bg: "bg-orange-50" },
-    { name: "Vercel", icon: GitBranch, color: "text-brand-navy", bg: "bg-brand-slate-100" },
-  ];
-
-  /* ── Animated headline words ── */
-  const headlineWords = ["Engineering", "Intelligence", "for Service", "Growth."];
 
   return (
     <div className="min-h-screen bg-white text-brand-navy selection:bg-brand-indigo/10 flex flex-col font-sans relative overflow-x-hidden">
@@ -542,23 +499,29 @@ function AppInner() {
           </ScrollReveal>
 
           <StaggerContainer className="grid grid-cols-2 sm:grid-cols-4 gap-4" staggerDelay={0.07}>
-            {techStack.map((tech) => {
-              const Icon = tech.icon;
-              return (
-                <StaggerItem key={tech.name}>
-                  <motion.div
-                    className="p-5 bg-white border border-brand-slate-200 rounded-2xl flex flex-col items-center gap-3 group cursor-default"
-                    whileHover={shouldReduce ? {} : { y: -4, boxShadow: "0 12px 40px -10px rgba(0,0,0,0.08)" }}
-                    transition={{ type: "spring", stiffness: 360, damping: 22 }}
-                  >
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${tech.bg} group-hover:scale-110 transition-transform`}>
-                      <Icon className={`w-5 h-5 ${tech.color}`} aria-hidden="true" />
-                    </div>
-                    <span className="text-xs font-bold text-brand-navy text-center leading-tight">{tech.name}</span>
-                  </motion.div>
-                </StaggerItem>
-              );
-            })}
+            {[
+              { name: "React",           Icon: Monitor,   color: "text-cyan-500",     bg: "bg-cyan-50"           },
+              { name: "TypeScript",      Icon: Code,      color: "text-blue-600",     bg: "bg-blue-50"           },
+              { name: "Node.js",         Icon: Layers,    color: "text-green-600",    bg: "bg-green-50"          },
+              { name: "MongoDB",         Icon: Database,  color: "text-emerald-600",  bg: "bg-emerald-50"        },
+              { name: "OpenAI / Gemini", Icon: Bot,       color: "text-violet-600",   bg: "bg-violet-50"         },
+              { name: "Docker",          Icon: Cloud,     color: "text-sky-600",      bg: "bg-sky-50"            },
+              { name: "AWS / GCP",       Icon: Globe,     color: "text-orange-500",   bg: "bg-orange-50"         },
+              { name: "Vercel",          Icon: GitBranch, color: "text-brand-navy",   bg: "bg-brand-slate-100"   },
+            ].map((tech) => (
+              <StaggerItem key={tech.name}>
+                <motion.div
+                  className="p-5 bg-white border border-brand-slate-200 rounded-2xl flex flex-col items-center gap-3 group cursor-default"
+                  whileHover={shouldReduce ? {} : { y: -4, boxShadow: "0 12px 40px -10px rgba(0,0,0,0.08)" }}
+                  transition={{ type: "spring", stiffness: 360, damping: 22 }}
+                >
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${tech.bg} group-hover:scale-110 transition-transform`}>
+                    <tech.Icon className={`w-5 h-5 ${tech.color}`} aria-hidden="true" />
+                  </div>
+                  <span className="text-xs font-bold text-brand-navy text-center leading-tight">{tech.name}</span>
+                </motion.div>
+              </StaggerItem>
+            ))}
           </StaggerContainer>
         </section>
 
@@ -619,7 +582,6 @@ function AppInner() {
         </section>
 
         {/* ══════════════════════════════════════════
-        {/* ══════════════════════════════════════════
             PRICING PLANS
         ══════════════════════════════════════════ */}
         <PricingSection
@@ -627,7 +589,6 @@ function AppInner() {
           onOpenChat={() => { openWidget(); }}
         />
 
-        {/* ══════════════════════════════════════════
         {/* ══════════════════════════════════════════
             ABOUT / COMPANY
         ══════════════════════════════════════════ */}
@@ -777,7 +738,7 @@ function AppInner() {
                     </button>
                   </li>
                   <li>
-                    <a href="mailto:vvnetworks26@gmail.com" className="text-xs text-brand-slate-600 hover:text-brand-navy transition-colors focus-visible:outline-1 focus-visible:outline-brand-blue rounded">
+                    <a href="mailto:vvnetworks26@gmail.com" className="text-xs text-brand-slate-600 hover:text-brand-navy transition-colors focus-visible:outline-1 focus-visible:outline-brand-blue rounded" rel="noopener">
                       vvnetworks26@gmail.com
                     </a>
                   </li>

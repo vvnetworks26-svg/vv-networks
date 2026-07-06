@@ -7,7 +7,9 @@
  * In production (Vercel frontend + Render backend) VITE_API_URL is set to
  * the Render service URL, e.g. https://vv-networks-api.onrender.com
  */
-const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+import { env } from "./environment";
+
+const BASE_URL = env.apiUrl;
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
