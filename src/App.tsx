@@ -45,6 +45,7 @@ import ServicesSection from "./components/services";
 import PricingSection from "./components/pricing";
 import AboutSection from "./components/about";
 import ContactSection from "./components/contact";
+import { LeadFlowProvider, LeadFlowWidget, useLeadFlow } from "./components/leadflow-sdk";
 import { api } from "./lib/apiClient";
 import type { ChatMessage } from "./lib/apiClient";
 import { CaseStudy, ServiceItem, PricingTier } from "./types";
@@ -130,26 +131,21 @@ function GradientWord({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  return (
+    <LeadFlowProvider config={{ mode: "demo" }}>
+      <AppInner />
+    </LeadFlowProvider>
+  );
+}
+
+function AppInner() {
   const shouldReduce = useReducedMotion();
+  const { openWidget } = useLeadFlow();
 
   // Navigation & Interactive States
   const [activeSection, setActiveSection] = useState("home");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
-
-  // LeadFlow Chat Widget States
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<Array<{ id: string; role: string; content: string; timestamp: Date }>>([
-    {
-      id: "welcome",
-      role: "model",
-      content: "Hello! I'm LeadFlow, the autonomous agent of VV Networks. I can qualify leads, schedule consultation demos, and discuss custom engineering solutions. What business do you run or what automated pipeline are you looking to build?",
-      timestamp: new Date(),
-    },
-  ]);
-  const [chatInput, setChatInput] = useState("");
-  const [isChatTyping, setIsChatTyping] = useState(false);
-  const [hasNewMessageBadge, setHasNewMessageBadge] = useState(true);
 
   // FAQ Expanded States
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
@@ -160,63 +156,12 @@ export default function App() {
   // Header scroll state
   const [scrolled, setScrolled] = useState(false);
 
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const triggerDashboardSync = () => setDashboardRefreshTrigger((prev) => prev + 1);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages, isChatTyping]);
-
-  const triggerDashboardSync = () => setDashboardRefreshTrigger((prev) => prev + 1);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-
-    const userMsg = { id: `user-${Date.now()}`, role: "user", content: chatInput, timestamp: new Date() };
-    setChatMessages((prev) => [...prev, userMsg]);
-    setChatInput("");
-    setIsChatTyping(true);
-
-    try {
-      const history: ChatMessage[] = chatMessages.map((m) => ({
-        role: m.role === "user" ? "user" : "model",
-        content: m.content,
-      }));
-      const result = await api.chat(userMsg.content, history);
-      setChatMessages((prev) => [
-        ...prev,
-        { id: `ai-${Date.now()}`, role: "model", content: result.text, timestamp: new Date() },
-      ]);
-    } catch {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          id: `ai-err-${Date.now()}`,
-          role: "model",
-          content: "We'd love to partner with you. Let's schedule a 15-minute founding team screen-share to build a tailored solution for your requirements. Click 'Book Team Demo' above.",
-          timestamp: new Date(),
-        },
-      ]);
-    } finally {
-      setIsChatTyping(false);
-    }
-  };
-
-  // Auto-open widget after 4 s on first visit
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isChatOpen) {
-        setIsChatOpen(true);
-        setHasNewMessageBadge(false);
-      }
-    }, 4000);
-    return () => clearTimeout(timer);
   }, []);
 
   /* ── Data definitions ── */
@@ -317,7 +262,7 @@ export default function App() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+              onClick={() => { openWidget(); }}
               className="hidden sm:inline-flex px-4 py-2 rounded-full border border-brand-slate-200 text-xs font-bold text-brand-slate-700 hover:bg-brand-slate-50 transition-all gap-1.5 items-center focus-visible:outline-2 focus-visible:outline-brand-blue"
               aria-label="Open LeadFlow widget demo"
             >
@@ -513,7 +458,7 @@ export default function App() {
                     <RippleButton
                       variant="secondary"
                       className="px-5 py-3 rounded-xl text-xs"
-                      onClick={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+                      onClick={() => { openWidget(); }}
                       aria-label="Open LeadFlow sandbox widget"
                     >
                       Initialize Sandbox Widget
@@ -572,7 +517,7 @@ export default function App() {
         ══════════════════════════════════════════ */}
         <ServicesSection
           onBookDemo={() => setIsBookingOpen(true)}
-          onOpenChat={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+          onOpenChat={() => { openWidget(); }}
         />
 
         {/* ══════════════════════════════════════════
@@ -679,7 +624,7 @@ export default function App() {
         ══════════════════════════════════════════ */}
         <PricingSection
           onBookDemo={() => setIsBookingOpen(true)}
-          onOpenChat={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+          onOpenChat={() => { openWidget(); }}
         />
 
         {/* ══════════════════════════════════════════
@@ -688,7 +633,7 @@ export default function App() {
         ══════════════════════════════════════════ */}
         <AboutSection
           onBookDemo={() => setIsBookingOpen(true)}
-          onOpenChat={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+          onOpenChat={() => { openWidget(); }}
         />
 
         {/* ══════════════════════════════════════════
@@ -762,7 +707,7 @@ export default function App() {
             CONTACT / CONVERSION
         ══════════════════════════════════════════ */}
         <ContactSection
-          onOpenChat={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }}
+          onOpenChat={() => { openWidget(); }}
         />
 
       </main>
@@ -827,7 +772,7 @@ export default function App() {
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => { setIsChatOpen(true); setHasNewMessageBadge(false); }} className="text-xs text-brand-slate-600 hover:text-brand-navy transition-colors text-left focus-visible:outline-1 focus-visible:outline-brand-blue rounded">
+                    <button onClick={() => { openWidget(); }} className="text-xs text-brand-slate-600 hover:text-brand-navy transition-colors text-left focus-visible:outline-1 focus-visible:outline-brand-blue rounded">
                       Chat with LeadFlow
                     </button>
                   </li>
@@ -857,144 +802,9 @@ export default function App() {
       </footer>
 
       {/* ══════════════════════════════════════════
-          FLOATING LEADFLOW CHAT WIDGET
+          LEADFLOW SDK WIDGET
       ══════════════════════════════════════════ */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end space-y-4">
-
-        <AnimatePresence>
-          {isChatOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: shouldReduce ? 0 : 30, scale: shouldReduce ? 1 : 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: shouldReduce ? 0 : 30, scale: shouldReduce ? 1 : 0.92 }}
-              transition={{ type: "spring", stiffness: 340, damping: 28 }}
-              className="bg-white border border-brand-slate-200 w-[350px] sm:w-[380px] h-[500px] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative"
-              role="dialog"
-              aria-label="LeadFlow AI chat widget"
-              aria-modal="false"
-            >
-              {/* Chat header */}
-              <div className="px-4 py-3 bg-brand-navy text-white flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <div className="w-8 h-8 rounded-full bg-brand-blue flex items-center justify-center font-black text-sm" aria-hidden="true">L</div>
-                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-brand-navy" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-xs block">LeadFlow</span>
-                    <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                      Active — AI Qualified
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsChatOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors focus-visible:outline-2 focus-visible:outline-white"
-                  aria-label="Close chat widget"
-                >
-                  <X className="w-4 h-4" aria-hidden="true" />
-                </button>
-              </div>
-
-              {/* Messages area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
-                {chatMessages.map((msg) => (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: shouldReduce ? 0 : 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
-                        msg.role === "user"
-                          ? "bg-brand-navy text-white rounded-tr-sm"
-                          : "bg-brand-slate-100 text-brand-navy rounded-tl-sm"
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
-                  </motion.div>
-                ))}
-
-                {isChatTyping && (
-                  <motion.div
-                    className="flex justify-start"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <div className="bg-brand-slate-100 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-1.5">
-                      {[0, 1, 2].map((i) => (
-                        <motion.div
-                          key={i}
-                          className="w-1.5 h-1.5 bg-brand-slate-400 rounded-full"
-                          animate={shouldReduce ? {} : { y: [0, -5, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                          aria-hidden="true"
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-
-              {/* Input */}
-              <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-brand-slate-100 flex gap-2 flex-shrink-0">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Ask a question or describe your business..."
-                  className="flex-1 text-xs border border-brand-slate-200 rounded-xl px-3 py-2.5 outline-none focus:border-brand-blue transition-all focus:ring-1 focus:ring-brand-blue"
-                  aria-label="Chat message input"
-                />
-                <button
-                  type="submit"
-                  disabled={!chatInput.trim() || isChatTyping}
-                  className="p-2.5 bg-brand-navy hover:bg-brand-blue text-white rounded-xl transition-all disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-brand-blue"
-                  aria-label="Send message"
-                >
-                  <Send className="w-4 h-4" aria-hidden="true" />
-                </button>
-              </form>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Floating trigger button */}
-        <motion.button
-          onClick={() => { setIsChatOpen(!isChatOpen); setHasNewMessageBadge(false); }}
-          className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-brand-blue via-brand-indigo to-brand-violet text-white flex items-center justify-center shadow-2xl z-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-indigo"
-          whileHover={shouldReduce ? {} : { scale: 1.07 }}
-          whileTap={shouldReduce ? {} : { scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          aria-label={isChatOpen ? "Close LeadFlow chat" : "Open LeadFlow chat"}
-          aria-expanded={isChatOpen}
-        >
-          <AnimatePresence mode="wait">
-            {isChatOpen ? (
-              <motion.div key="close" initial={{ rotate: shouldReduce ? 0 : -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: shouldReduce ? 0 : 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                <X className="w-6 h-6" aria-hidden="true" />
-              </motion.div>
-            ) : (
-              <motion.div key="open" initial={{ rotate: shouldReduce ? 0 : 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: shouldReduce ? 0 : -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                <MessageSquare className="w-6 h-6" aria-hidden="true" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {hasNewMessageBadge && !isChatOpen && (
-            <span className="absolute -top-1 -right-1 flex h-5 w-5" aria-label="New message">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-violet opacity-75" />
-              <span className="relative inline-flex rounded-full h-5 w-5 bg-brand-violet items-center justify-center text-[10px] font-bold text-white">1</span>
-            </span>
-          )}
-        </motion.button>
-
-      </div>
+      <LeadFlowWidget onBookDemo={() => setIsBookingOpen(true)} />
 
       {/* ══════════════════════════════════════════
           BOOKING MODAL
