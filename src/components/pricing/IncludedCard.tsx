@@ -1,14 +1,14 @@
-import React from "react";
+import React, { memo } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
-  Search, Map, Calendar, MessageCircle,
-  ShieldCheck, Rocket, FileText, HeartHandshake,
+  UserCheck, MessageCircle, FileText, Shield,
+  Rocket, Headphones, Clock, HeartHandshake,
 } from "lucide-react";
 import type { IncludedItem } from "./pricingData";
 
 const iconMap: Record<string, React.ElementType> = {
-  Search, Map, Calendar, MessageCircle,
-  ShieldCheck, Rocket, FileText, HeartHandshake,
+  UserCheck, MessageCircle, FileText, Shield,
+  Rocket, Headphones, Clock, HeartHandshake,
 };
 
 interface IncludedCardProps {
@@ -17,7 +17,7 @@ interface IncludedCardProps {
   key?: string;
 }
 
-export default function IncludedCard({ item, index }: IncludedCardProps) {
+const IncludedCard = memo(function IncludedCard({ item, index }: IncludedCardProps) {
   const shouldReduce = useReducedMotion();
   const Icon = iconMap[item.icon] ?? Rocket;
 
@@ -37,4 +37,6 @@ export default function IncludedCard({ item, index }: IncludedCardProps) {
       <p className="text-xs text-brand-slate-500 leading-relaxed">{item.description}</p>
     </motion.div>
   );
-}
+});
+
+export default IncludedCard;
