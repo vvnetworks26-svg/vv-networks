@@ -1,0 +1,6 @@
+{
+  "name": "VV Networks",
+  "description": "Official website for VV Networks, a premium AI software company helping service businesses automate operations, generate leads, and grow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
