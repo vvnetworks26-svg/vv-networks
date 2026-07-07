@@ -14,11 +14,16 @@ import { AnalyticsEvent } from "./models/AnalyticsEvent.js";
 import { Project } from "./models/Project.js";
 import { Invoice } from "./models/Invoice.js";
 import { Service } from "./models/Service.js";
+import { RefreshToken } from "./models/RefreshToken.js";
+import { PasswordResetToken } from "./models/PasswordResetToken.js";
+import { EmailVerificationToken } from "./models/EmailVerificationToken.js";
+import { AuditLog } from "./models/AuditLog.js";
 
 const MODELS = [
   Business, User, Lead, Conversation, Message,
   Appointment, ContactRequest, WidgetSession,
   AnalyticsEvent, Project, Invoice, Service,
+  RefreshToken, PasswordResetToken, EmailVerificationToken, AuditLog,
 ];
 
 export async function ensureIndexes(): Promise<void> {
