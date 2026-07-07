@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
 import { config } from "./config.js";
-import { connectDatabase, ensureIndexes, databaseHealthCheck } from "../database/index.js";
+import { connectDatabase, ensureIndexes } from "../database/index.js";
 import healthRouter from "./routes/health.routes.js";
 import leadflowRouter from "./routes/leadflow.routes.js";
 import bookingRouter from "./routes/booking.routes.js";
+import v1Router from "./api/routes/v1.js";
 
 export async function initDatabase(): Promise<void> {
   await connectDatabase();
@@ -18,14 +19,18 @@ export function createApp() {
   app.use(
     cors({
       origin: config.corsOrigin,
-      methods: ["GET", "POST", "OPTIONS"],
+      methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     })
   );
 
-  app.use("/api/health", healthRouter);
-  app.use("/api/leadflow", leadflowRouter);
-  app.use("/api/bookings", bookingRouter);
+  // Legacy routes (preserved — frontend depends on these)
+  app.use("/api/health",    healthRouter);
+  app.use("/api/leadflow",  leadflowRouter);
+  app.use("/api/bookings",  bookingRouter);
+
+  // v1 REST API
+  app.use("/api/v1", v1Router);
 
   return app;
 }
