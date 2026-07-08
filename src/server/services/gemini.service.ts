@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { config } from "../config.js";
+import logger from "../logger.js";
 
 const LEADFLOW_SYSTEM_PROMPT = `You are "LeadFlow", the interactive, high-converting AI representative on the official website of VV Networks.
 
@@ -18,14 +19,21 @@ Your goals:
 Be helpful, elegant, and outcome-focused.`;
 
 let client: GoogleGenAI | null = null;
+let clientKeySnapshot = "";   // tracks which key the client was built with
 
 function getClient(): GoogleGenAI | null {
-  if (!config.geminiApiKey) return null;
-  if (!client) {
+  if (!config.geminiApiKey) {
+    logger.warn("[Gemini] GEMINI_API_KEY is not set — fallback response will be used");
+    return null;
+  }
+  // Rebuild client if key changed (e.g. rotated via env var at runtime)
+  if (!client || clientKeySnapshot !== config.geminiApiKey) {
     client = new GoogleGenAI({
       apiKey: config.geminiApiKey,
       httpOptions: { headers: { "User-Agent": "vv-networks-leadflow" } },
     });
+    clientKeySnapshot = config.geminiApiKey;
+    logger.debug("[Gemini] Client initialised");
   }
   return client;
 }
@@ -42,11 +50,28 @@ export interface ChatResult {
 
 export async function generateChatReply(
   message: string,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  correlationId?: string
 ): Promise<ChatResult> {
+  const log = correlationId ? logger.child({ correlationId }) : logger;
+
   const ai = getClient();
 
+  // Stage 3: log what is about to be sent to Gemini
+  log.debug("[Gemini] Preparing request", {
+    geminiConfigured: !!config.geminiApiKey,
+    messageLen:       message.length,
+    historyTurns:     history.length,
+    history:          history.map((m) => ({ role: m.role, contentLen: m.content.length })),
+    messageSample:    message.slice(0, 120),
+  });
+
   if (!ai) {
+    // Stage 5: fallback path — explain why
+    log.warn("[Gemini] Using fallback response", {
+      reason: "GEMINI_API_KEY not configured",
+      fallback: true,
+    });
     return {
       text: "We'd love to partner with you. Click 'Book Team Demo' to schedule a 15-minute founding team screen-share and we'll build a tailored solution for your requirements.",
       fallback: true,
@@ -61,14 +86,62 @@ export async function generateChatReply(
     { role: "user" as const, parts: [{ text: message }] },
   ];
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents,
-    config: {
-      systemInstruction: LEADFLOW_SYSTEM_PROMPT,
-      temperature: 0.7,
-    },
+  // Stage 3: log exact contents shape (no secrets)
+  log.debug("[Gemini] Calling generateContent", {
+    model:        "gemini-2.0-flash",
+    contentTurns: contents.length,
+    temperature:  0.7,
   });
 
-  return { text: response.text ?? "", fallback: false };
+  const start = Date.now();
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents,
+      config: {
+        systemInstruction: LEADFLOW_SYSTEM_PROMPT,
+        temperature: 0.7,
+      },
+    });
+
+    const durationMs = Date.now() - start;
+
+    // Stage 4: log raw Gemini response
+    log.info("[Gemini] Response received", {
+      durationMs,
+      textLen:     response.text?.length ?? 0,
+      fallback:    false,
+      // Sample first 120 chars of response — enough to confirm it's real AI output
+      textSample:  response.text?.slice(0, 120) ?? "(empty)",
+    });
+
+    if (!response.text) {
+      log.warn("[Gemini] Empty text in response", {
+        rawResponse: JSON.stringify(response).slice(0, 300),
+      });
+    }
+
+    return { text: response.text ?? "", fallback: false };
+
+  } catch (err: unknown) {
+    const durationMs = Date.now() - start;
+
+    // Stage 4: log thrown error from Gemini SDK
+    log.exception("[Gemini] generateContent threw an error", err, {
+      durationMs,
+      messageLen:   message.length,
+      historyTurns: history.length,
+    });
+
+    // Stage 5: fallback fires because of SDK error
+    log.warn("[Gemini] Using fallback response", {
+      reason:   "Gemini SDK threw — see error above",
+      fallback: true,
+    });
+
+    return {
+      text: "We'd love to partner with you. Click 'Book Team Demo' to schedule a 15-minute founding team screen-share and we'll build a tailored solution for your requirements.",
+      fallback: true,
+    };
+  }
 }
