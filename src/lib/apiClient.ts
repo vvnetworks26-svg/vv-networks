@@ -1,11 +1,24 @@
 /**
  * Centralised API client for VV Networks frontend.
  *
- * In development the Vite dev proxy forwards /api/* to the Express server
- * running on the same process, so BASE_URL is an empty string ("").
+ * Request routing by environment:
  *
- * In production (Vercel frontend + Render backend) VITE_API_URL is set to
- * the Render service URL, e.g. https://vv-networks-api.onrender.com
+ * Development (Vite dev server):
+ *   VITE_API_URL is "" → BASE_URL is ""
+ *   Browser sends: POST /api/leadflow/chat
+ *   Vite proxy (vite.config.ts) forwards /api/* → Express on same process
+ *   No CORS, no absolute URL needed.
+ *
+ * Production (Vercel frontend + Render backend):
+ *   VITE_API_URL is "" (not needed — Vercel proxies the request)
+ *   Browser sends: POST https://your-app.vercel.app/api/leadflow/chat
+ *   vercel.json rewrite: /api/(.*) → https://vv-networks-api.onrender.com/api/$1
+ *   Vercel proxies to Render server-side → no CORS issues.
+ *
+ * If VITE_API_URL is explicitly set (e.g. direct Render testing):
+ *   BASE_URL = "https://vv-networks-api.onrender.com"
+ *   Browser sends: POST https://vv-networks-api.onrender.com/api/leadflow/chat
+ *   CORS_ORIGIN on Render must include the Vercel domain.
  */
 import { env } from "./environment";
 

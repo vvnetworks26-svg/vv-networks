@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { withBusiness } from "../middleware.js";
 import { validateBody, validateQuery } from "../validate.js";
+import billingRouter from "./billing.js";
+import operationsRouter from "./operations.js";
 
 // Schemas
 import {
@@ -138,5 +140,11 @@ v1.delete("/contact-requests/:id",                           deleteContactReques
 v1.get   ("/widget-sessions",                                listWidgetSessions);
 v1.post  ("/widget-sessions", validateBody(createWidgetSessionSchema), createWidgetSession);
 v1.patch ("/widget-sessions/:id", validateBody(updateWidgetSessionSchema), updateWidgetSession);
+
+// ── Billing (Phase I.5) ───────────────────────────────────────────────────────
+v1.use(billingRouter);
+
+// ── Operations (Phase I.7) ────────────────────────────────────────────────────
+v1.use(operationsRouter);
 
 export default v1;

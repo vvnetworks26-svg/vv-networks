@@ -2,6 +2,7 @@ import { leadRepository } from "../../database/repositories/LeadRepository.js";
 import type { ILead } from "../../database/models/Lead.js";
 import type { FilterQuery } from "mongoose";
 import mongoose from "mongoose";
+import metricsService, { METRIC } from "./metrics.service.js";
 
 function toOid(id: string): mongoose.Types.ObjectId | string {
   try { return new mongoose.Types.ObjectId(id); } catch { return id; }
@@ -76,7 +77,9 @@ export async function getLeadStats(businessId: string) {
 }
 
 export async function createLead(businessId: string, data: Partial<ILead>): Promise<ILead> {
-  return leadRepository.create({ ...data, businessId } as unknown as Partial<ILead>);
+  const lead = await leadRepository.create({ ...data, businessId } as unknown as Partial<ILead>);
+  metricsService.increment(METRIC.LEADS_CREATED);
+  return lead;
 }
 
 export async function updateLead(id: string, data: Partial<ILead>): Promise<ILead | null> {

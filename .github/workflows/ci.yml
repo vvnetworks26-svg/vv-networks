@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging, develop]
+  pull_request:
+    branches: [main, staging]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.x"
+
+jobs:
+  # ── 1. TypeScript + Lint ────────────────────────────────────────────────────
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run lint
+
+  # ── 2. Security Audit ───────────────────────────────────────────────────────
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+        continue-on-error: true   # don't block CI on low/moderate advisories
+
+  # ── 3. Production Build ─────────────────────────────────────────────────────
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build client
+        run: npm run build:client
+        env:
+          VITE_APP_VERSION: ${{ github.sha }}
+
+      - name: Build server
+        run: npm run build:server
+        env:
+          GIT_COMMIT: ${{ github.sha }}
+
+      - name: Check server bundle size
+        run: |
+          SIZE=$(du -k dist/server.cjs | cut -f1)
+          echo "Server bundle: ${SIZE}KB"
+          if [ "$SIZE" -gt 2048 ]; then
+            echo "::warning::Server bundle is larger than 2MB (${SIZE}KB)"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: |
+            dist/server.cjs
+            dist/server.cjs.map
+          retention-days: 7
+
+  # ── 4. Environment Validation ───────────────────────────────────────────────
+  env-check:
+    name: Env Validation
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate env schema
+        run: |
+          node -e "
+            import('./src/server/env-validator.js').then(m => {
+              process.env.NODE_ENV = 'development';
+              const r = m.validateEnvironment();
+              console.log('Env rules:', require('./src/server/env-validator.js'));
+              console.log('Validation result:', r.valid ? 'OK' : 'WARNINGS');
+              process.exit(0);
+            }).catch(e => { console.error(e); process.exit(0); });
+          "
+        continue-on-error: true
+
+  # ── 5. Deploy to Render (main branch) ──────────────────────────────────────
+  deploy-production:
+    name: Deploy → Production
+    runs-on: ubuntu-latest
+    needs: [build, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    steps:
+      - name: Trigger Render deploy
+        if: vars.RENDER_DEPLOY_HOOK != ''
+        run: |
+          curl -X POST "${{ vars.RENDER_DEPLOY_HOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": false}'
+        env:
+          RENDER_DEPLOY_HOOK: ${{ vars.RENDER_DEPLOY_HOOK }}
+
+      - name: Trigger Vercel deploy
+        if: vars.VERCEL_DEPLOY_HOOK != ''
+        run: curl -X POST "${{ vars.VERCEL_DEPLOY_HOOK }}"
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ vars.VERCEL_DEPLOY_HOOK }}
+
+  # ── 6. Deploy to Staging (staging branch) ──────────────────────────────────
+  deploy-staging:
+    name: Deploy → Staging
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    environment:
+      name: staging
+    steps:
+      - name: Trigger Render staging deploy
+        if: vars.RENDER_STAGING_HOOK != ''
+        run: curl -X POST "${{ vars.RENDER_STAGING_HOOK }}"

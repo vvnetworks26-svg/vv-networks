@@ -6,6 +6,7 @@ import { hashPassword, comparePassword, generateResetToken, hashTokenRaw } from 
 import { issueTokenPair, revokeRefreshToken, revokeAllUserTokens, type TokenPair } from "./token.service.js";
 import { audit } from "./audit.service.js";
 import { sendPasswordResetEmail } from "./email.service.js";
+import metricsService, { METRIC } from "./metrics.service.js";
 import type { Request } from "express";
 
 export interface RegisterInput {
@@ -59,6 +60,7 @@ export async function register(input: RegisterInput, req: Request): Promise<Auth
   );
 
   await audit("auth.register", { req, userId: String(user._id), businessId: input.businessId });
+  metricsService.increment(METRIC.AUTH_REGISTERS);
 
   return {
     tokens,
@@ -75,6 +77,7 @@ export async function login(input: LoginInput, req: Request): Promise<AuthResult
 
   if (!user || !user.passwordHash) {
     await audit("auth.login_failed", { req, meta: { email: input.email } });
+    metricsService.increment(METRIC.AUTH_FAILURES);
     throw Object.assign(new Error("Invalid credentials"), { code: "INVALID_CREDENTIALS", status: 401 });
   }
 
@@ -85,6 +88,7 @@ export async function login(input: LoginInput, req: Request): Promise<AuthResult
   const valid = await comparePassword(input.password, user.passwordHash);
   if (!valid) {
     await audit("auth.login_failed", { req, userId: String(user._id), meta: { email: input.email } });
+    metricsService.increment(METRIC.AUTH_FAILURES);
     throw Object.assign(new Error("Invalid credentials"), { code: "INVALID_CREDENTIALS", status: 401 });
   }
 
@@ -97,6 +101,7 @@ export async function login(input: LoginInput, req: Request): Promise<AuthResult
   );
 
   await audit("auth.login", { req, userId: String(user._id), businessId: String(user.businessId) });
+  metricsService.increment(METRIC.AUTH_LOGINS);
 
   return {
     tokens,
