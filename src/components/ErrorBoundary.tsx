@@ -7,6 +7,7 @@
  */
 import React from "react";
 import type { ReactNode } from "react";
+import { CONTACT_EMAIL } from "../lib/contact";
 
 interface FallbackProps {
   onReset: () => void;
@@ -29,11 +30,11 @@ function DefaultFallback({ onReset }: FallbackProps) {
           We hit an unexpected error. Refreshing usually fixes it. If the
           problem persists, reach out at{" "}
           <a
-            href="mailto:vvnetworks26@gmail.com"
+            href={`mailto:${CONTACT_EMAIL}`}
             rel="noopener"
             className="text-brand-blue hover:underline focus-visible:outline-2 focus-visible:outline-brand-blue rounded"
           >
-            vvnetworks26@gmail.com
+            {CONTACT_EMAIL}
           </a>
           .
         </p>

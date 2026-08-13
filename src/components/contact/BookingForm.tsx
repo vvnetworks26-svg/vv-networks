@@ -9,6 +9,8 @@ import {
   projectTypeOptions, budgetOptions, timelineOptions,
 } from "./contactData";
 import { validateField, validateForm, type FormErrors } from "./validation";
+import { api } from "../../lib/apiClient";
+import { CONTACT_EMAIL } from "../../lib/contact";
 
 const projectIcons: Record<string, React.ElementType> = {
   Bot, Globe, Code, Zap, Layers,
@@ -19,11 +21,6 @@ const EMPTY_FORM: ContactFormData = {
   website: "", projectType: "", budget: "", timeline: "",
   message: "", preferredContact: "email", wantsLeadFlowDemo: false,
 };
-
-/** Mocked submit — resolves after 1200ms. Replace with real API in Phase D. */
-async function mockSubmit(_data: ContactFormData): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 1200));
-}
 
 interface FormFieldProps {
   id: string;
@@ -77,6 +74,7 @@ const BookingForm = memo(function BookingForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const set = useCallback(<K extends keyof ContactFormData>(key: K, value: ContactFormData[K]) => {
     setForm((prev) => {
@@ -115,9 +113,30 @@ const BookingForm = memo(function BookingForm() {
     if (Object.keys(allErrors).length > 0) return;
 
     setLoading(true);
-    await mockSubmit(form);
-    setLoading(false);
-    setSubmitted(true);
+    setSubmitError(null);
+    try {
+      await api.createContactRequest({
+        name: form.name,
+        email: form.email,
+        company: form.company || undefined,
+        phone: form.phone || undefined,
+        industry: form.industry || undefined,
+        website: form.website || undefined,
+        projectType: form.projectType,
+        budget: form.budget || undefined,
+        timeline: form.timeline || undefined,
+        message: form.message,
+        preferredContact: form.preferredContact,
+        wantsLeadFlowDemo: form.wantsLeadFlowDemo,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(
+        `Something went wrong sending your enquiry. Please try again, or email us directly at ${CONTACT_EMAIL}.`
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
@@ -125,6 +144,7 @@ const BookingForm = memo(function BookingForm() {
     setTouched({});
     setErrors({});
     setSubmitted(false);
+    setSubmitError(null);
   };
 
   if (submitted) {
@@ -387,6 +407,21 @@ const BookingForm = memo(function BookingForm() {
           I'd like a live <strong className="text-brand-navy">LeadFlow demonstration</strong> during the strategy session.
         </span>
       </label>
+
+      {/* Submission error */}
+      <AnimatePresence initial={false}>
+        {submitError && (
+          <motion.p
+            className="text-xs text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-xl px-4 py-3"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            role="alert"
+          >
+            {submitError}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {/* Submit */}
       <motion.button

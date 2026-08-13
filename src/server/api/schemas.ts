@@ -108,46 +108,6 @@ export const updateContactRequestSchema = z.object({
   status: z.enum(["new","reviewed","replied","archived"]).optional(),
 });
 
-// ── Project ───────────────────────────────────────────────────────────────────
-export const createProjectSchema = z.object({
-  clientId:           z.string().optional(),
-  managedBy:          z.string().optional(),
-  name:               z.string().min(1).max(200),
-  type:               z.enum(["leadflow","website","custom-software","ai-automation","tech-partner"]),
-  description:        z.string().max(5000).optional(),
-  totalValue:         z.number().min(0).default(0),
-  startDate:          z.string().datetime().optional(),
-  targetDeliveryDate: z.string().datetime().optional(),
-  repoUrl:            z.string().url().optional(),
-  notes:              z.string().optional(),
-});
-export const updateProjectSchema = createProjectSchema.partial().extend({
-  status: z.enum(["discovery","proposal","active","review","completed","paused","cancelled"]).optional(),
-  paidValue: z.number().min(0).optional(),
-});
-
-// ── Invoice ───────────────────────────────────────────────────────────────────
-export const lineItemSchema = z.object({
-  description: z.string().min(1),
-  quantity:    z.number().min(0),
-  unitPrice:   z.number().min(0),
-  total:       z.number().min(0),
-});
-export const createInvoiceSchema = z.object({
-  projectId: z.string().optional(),
-  clientId:  z.string().optional(),
-  lineItems: z.array(lineItemSchema).min(1),
-  taxRate:   z.number().min(0).max(100).default(0),
-  currency:  z.string().length(3).default("USD"),
-  issuedAt:  z.string().datetime().optional(),
-  dueAt:     z.string().datetime().optional(),
-  notes:     z.string().max(2000).optional(),
-});
-export const updateInvoiceSchema = createInvoiceSchema.partial().extend({
-  status: z.enum(["draft","sent","paid","overdue","cancelled"]).optional(),
-  paidAt: z.string().datetime().optional(),
-});
-
 // ── Service ───────────────────────────────────────────────────────────────────
 export const createServiceSchema = z.object({
   name:             z.string().min(1).max(200),

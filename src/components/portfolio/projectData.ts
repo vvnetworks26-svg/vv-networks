@@ -51,8 +51,6 @@ export const projects: Project[] = [
       "Service businesses lose 30–40% of inbound leads to slow follow-up, generic web forms, and after-hours gaps. Every missed conversation is a missed revenue opportunity.",
     solution:
       "LeadFlow deploys as an intelligent conversational widget that qualifies visitors in real time, extracts structured lead data through natural dialogue, and auto-books qualified appointments directly into the owner's calendar.",
-    metric: "4.2×",
-    metricLabel: "Lead-to-Demo Conversion",
     caseStudy: {
       overview:
         "LeadFlow is VV Networks' flagship AI product — a conversational qualification engine built to replace static contact forms with intelligent, outcome-driven conversations.",
@@ -61,7 +59,7 @@ export const projects: Project[] = [
       approach:
         "We engineered a widget that lives on any website and engages visitors within seconds. Powered by Google Gemini, it extracts qualification signals through natural conversation — property type, urgency, budget, location — then books the appointment slot directly. All structured data syncs to the business dashboard and pushes to the owner's CRM.",
       businessValue:
-        "Clients deploying LeadFlow see an average 4× increase in lead-to-demo conversion. One client captured $124,000 in additional pipeline in the first 30 days. The system runs continuously — qualifying and booking while the owner is asleep, in a meeting, or on-site.",
+        "LeadFlow is built to run continuously — qualifying and booking appointments while the owner is asleep, in a meeting, or on-site — turning after-hours traffic that would otherwise go cold into booked pipeline. We're onboarding early design partners now; case-study results will be published here as real usage data comes in.",
     },
   },
   {

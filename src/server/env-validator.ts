@@ -42,22 +42,6 @@ const RULES: EnvRule[] = [
     validationMessage: "Must be a valid MongoDB connection string (mongodb:// or mongodb+srv://)",
   },
 
-  // ── Stripe ────────────────────────────────────────────────────────────────
-  {
-    key: "STRIPE_SECRET_KEY",
-    required: "optional",
-    description: "Stripe secret key (sk_live_... or sk_test_...)",
-    validate: (v) => v.startsWith("sk_"),
-    validationMessage: "Must start with sk_live_ or sk_test_",
-  },
-  {
-    key: "STRIPE_WEBHOOK_SECRET",
-    required: "optional",
-    description: "Stripe webhook signing secret (whsec_...)",
-    validate: (v) => v.startsWith("whsec_"),
-    validationMessage: "Must start with whsec_",
-  },
-
   // ── App ───────────────────────────────────────────────────────────────────
   {
     key: "APP_URL",

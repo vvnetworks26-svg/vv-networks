@@ -14,7 +14,6 @@ export interface RegisterInput {
   email: string;
   password: string;
   businessId: string;
-  role?: "owner" | "admin" | "agent" | "viewer";
 }
 
 export interface LoginInput {
@@ -45,12 +44,15 @@ export async function register(input: RegisterInput, req: Request): Promise<Auth
   if (existing) throw Object.assign(new Error("Email already registered"), { code: "EMAIL_EXISTS", status: 409 });
 
   const passwordHash = await hashPassword(input.password);
+  // SECURITY: role is always "viewer" for self-registration, never taken
+  // from input — see registerSchema in auth.controller.ts for the matching
+  // constraint at the request-validation layer.
   const user = await User.create({
     businessId: input.businessId,
     name: input.name.trim(),
     email: input.email.toLowerCase().trim(),
     passwordHash,
-    role: input.role ?? "agent",
+    role: "viewer",
     isActive: true,
   });
 

@@ -85,6 +85,29 @@ export interface BookingResponse {
   booking: Booking;
 }
 
+export interface CreateContactRequestPayload {
+  name: string;
+  email: string;
+  company?: string;
+  phone?: string;
+  industry?: string;
+  website?: string;
+  projectType: string;
+  budget?: string;
+  timeline?: string;
+  message: string;
+  preferredContact: "email" | "phone" | "whatsapp";
+  wantsLeadFlowDemo: boolean;
+}
+
+export interface ContactRequestResponse {
+  success: boolean;
+  data: {
+    _id: string;
+    [key: string]: unknown;
+  };
+}
+
 export interface HealthResponse {
   status: string;
   service: string;
@@ -114,7 +137,10 @@ export const api = {
     });
   },
 
-  getBookings(): Promise<Booking[]> {
-    return request<Booking[]>("/api/bookings");
+  createContactRequest(payload: CreateContactRequestPayload): Promise<ContactRequestResponse> {
+    return request<ContactRequestResponse>("/api/v1/contact-requests", {
+      method: "POST",
+      body: payload,
+    });
   },
 };

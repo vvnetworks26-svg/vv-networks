@@ -58,10 +58,10 @@ export const config = {
   // Gemini
   geminiApiKey: env("GEMINI_API_KEY"),
 
-  // Stripe (Phase I.6)
-  stripeSecretKey:    env("STRIPE_SECRET_KEY"),
-  stripeWebhookSecret:env("STRIPE_WEBHOOK_SECRET"),
-  stripePublishableKey:env("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"),
+  // Email notifications (Resend — https://resend.com)
+  resendApiKey:    env("RESEND_API_KEY"),
+  notifyEmailTo:   env("NOTIFY_EMAIL_TO", "vvnetworks26@gmail.com"),
+  notifyEmailFrom: env("NOTIFY_EMAIL_FROM", "VV Networks <notifications@vvnetworks.co.in>"),
 
   // Logging
   logLevel: env("LOG_LEVEL", isProd ? "info" : "debug"),

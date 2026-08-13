@@ -1,3 +1,5 @@
+import { CONTACT_EMAIL } from "../../lib/contact";
+
 export type ProjectType =
   | "leadflow"
   | "website"
@@ -101,10 +103,10 @@ export const contactOptions: ContactOption[] = [
     id: "email",
     icon: "Mail",
     label: "Email",
-    value: "vvnetworks26@gmail.com",
+    value: CONTACT_EMAIL,
     description: "Best for detailed project briefs and technical enquiries.",
     action: "Send email",
-    href: "mailto:vvnetworks26@gmail.com",
+    href: `mailto:${CONTACT_EMAIL}`,
   },
   {
     id: "hours",
