@@ -12,7 +12,6 @@ import logger from "./logger.js";
 
 // Routes
 import monitoringRouter from "./routes/monitoring.routes.js";
-import webhookRouter    from "./routes/webhooks.routes.js";
 import healthRouter     from "./routes/health.routes.js";       // legacy
 import leadflowRouter   from "./routes/leadflow.routes.js";
 import bookingRouter    from "./routes/booking.routes.js";
@@ -46,7 +45,7 @@ export function createApp() {
         scriptSrc:   ["'self'", "'unsafe-inline'"],   // Vite inlines scripts
         styleSrc:    ["'self'", "'unsafe-inline'"],
         imgSrc:      ["'self'", "data:", "https:"],
-        connectSrc:  ["'self'", "https://api.stripe.com"],
+        connectSrc:  ["'self'"],
         frameSrc:    ["'none'"],
         objectSrc:   ["'none'"],
         upgradeInsecureRequests: [],
@@ -62,7 +61,7 @@ export function createApp() {
   app.use(cors({
     origin:       corsOrigins,
     methods:      ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders:["Content-Type", "Authorization", "X-Correlation-Id", "Stripe-Signature"],
+    allowedHeaders:["Content-Type", "Authorization", "X-Correlation-Id"],
     exposedHeaders:["X-Correlation-Id"],
     credentials:  true,
     maxAge:       86400,
@@ -85,9 +84,6 @@ export function createApp() {
 
   // ── Maintenance mode guard ─────────────────────────────────────────────────
   app.use(maintenanceGuard);
-
-  // ── Webhooks (raw body — MUST be before express.json()) ──────────────────
-  app.use("/api/webhooks", webhookRouter);
 
   // ── Body parsing ──────────────────────────────────────────────────────────
   app.use(express.json({ limit: "100kb" }));

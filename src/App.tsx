@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import InteractiveDashboard from "./components/InteractiveDashboard";
+import type { Booking } from "./lib/apiClient";
 import BookingModal from "./components/BookingModal";
 import ScrollReveal from "./components/ScrollReveal";
 import StaggerContainer, { StaggerItem } from "./components/StaggerContainer";
@@ -34,6 +35,7 @@ import PricingSection from "./components/pricing";
 import AboutSection from "./components/about";
 import ContactSection from "./components/contact";
 import { LeadFlowProvider, LeadFlowWidget, useLeadFlow } from "./components/leadflow-sdk";
+import { CONTACT_EMAIL } from "./lib/contact";
 
 /* ─────────────────────────────────────────────────────────
    Reusable primitive: ripple button
@@ -128,12 +130,13 @@ function AppInner() {
   const { openWidget } = useLeadFlow();
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
+  const [latestBooking, setLatestBooking] = useState<Booking | null>(null);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
 
-  const triggerDashboardSync = useCallback(() =>
-    setDashboardRefreshTrigger((prev) => prev + 1), []);
+  const handleBookingSuccess = useCallback((booking: Booking) => {
+    setLatestBooking(booking);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -342,7 +345,7 @@ function AppInner() {
               transition={{ duration: 0.65, delay: shouldReduce ? 0 : 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/10 to-brand-violet/5 rounded-3xl filter blur-[60px] opacity-40 -z-10" />
-              <InteractiveDashboard triggerRefresh={dashboardRefreshTrigger} />
+              <InteractiveDashboard newBooking={latestBooking} />
 
               <motion.div
                 className="absolute -bottom-6 right-6 sm:right-12 bg-white px-4 py-3 border border-brand-slate-200 rounded-xl shadow-xl flex items-center gap-3"
@@ -738,8 +741,8 @@ function AppInner() {
                     </button>
                   </li>
                   <li>
-                    <a href="mailto:vvnetworks26@gmail.com" className="text-xs text-brand-slate-600 hover:text-brand-navy transition-colors focus-visible:outline-1 focus-visible:outline-brand-blue rounded" rel="noopener">
-                      vvnetworks26@gmail.com
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="text-xs text-brand-slate-600 hover:text-brand-navy transition-colors focus-visible:outline-1 focus-visible:outline-brand-blue rounded" rel="noopener">
+                      {CONTACT_EMAIL}
                     </a>
                   </li>
                 </ul>
@@ -773,7 +776,7 @@ function AppInner() {
       <BookingModal
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
-        onSuccess={triggerDashboardSync}
+        onSuccess={handleBookingSuccess}
       />
 
     </div>

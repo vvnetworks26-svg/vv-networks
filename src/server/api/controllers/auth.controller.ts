@@ -9,12 +9,15 @@ import {
 import type { AuthRequest } from "../auth.middleware.js";
 
 // ── Schemas ──────────────────────────────────────────────────────────────────
+// SECURITY: no `role` field — self-registration always creates "viewer"
+// (see register() in auth.service.ts). Granting any other role requires
+// an owner/admin acting through PATCH /api/v1/users/:id, or the one-time
+// `npm run user:bootstrap` script for the very first owner account.
 const registerSchema = z.object({
   name:       z.string().min(1).max(100),
   email:      z.string().email(),
   password:   z.string().min(8).max(128),
   businessId: z.string().min(1),
-  role:       z.enum(["owner","admin","agent","viewer"]).optional(),
 });
 
 const loginSchema = z.object({

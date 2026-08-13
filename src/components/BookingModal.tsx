@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { X, Calendar, Clock, Sparkles, Check, ArrowRight, Loader } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { api } from "../lib/apiClient";
+import type { Booking } from "../lib/apiClient";
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (booking: Booking) => void;
 }
 
 export default function BookingModal({ isOpen, onClose, onSuccess }: BookingModalProps) {
@@ -25,10 +26,10 @@ export default function BookingModal({ isOpen, onClose, onSuccess }: BookingModa
 
     setLoading(true);
     try {
-      await api.createBooking({ name, email, company, date, time, notes });
+      const res = await api.createBooking({ name, email, company, date, time, notes });
       setSubmitted(true);
       setTimeout(() => {
-        onSuccess();
+        onSuccess(res.booking);
         onClose();
         setName("");
         setEmail("");
@@ -45,13 +46,24 @@ export default function BookingModal({ isOpen, onClose, onSuccess }: BookingModa
     }
   };
 
-  const dates = [
-    { label: "Tomorrow", val: "2026-07-06" },
-    { label: "Tuesday, July 7", val: "2026-07-07" },
-    { label: "Wednesday, July 8", val: "2026-07-08" },
-    { label: "Thursday, July 9", val: "2026-07-09" },
-    { label: "Friday, July 10", val: "2026-07-10" },
-  ];
+  /** Next 5 weekdays starting tomorrow — computed fresh on every render, never stale. */
+  const dates = useMemo(() => {
+    const out: { label: string; val: string }[] = [];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const cursor = new Date(tomorrow);
+    const dayFmt = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" });
+    while (out.length < 5) {
+      const dow = cursor.getDay();
+      if (dow !== 0 && dow !== 6) {
+        const val = cursor.toISOString().slice(0, 10);
+        const isTomorrow = cursor.toDateString() === tomorrow.toDateString();
+        out.push({ label: isTomorrow ? "Tomorrow" : dayFmt.format(cursor), val });
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return out;
+  }, []);
 
   const times = ["9:00 AM", "11:00 AM", "1:30 PM", "3:00 PM", "4:30 PM"];
 

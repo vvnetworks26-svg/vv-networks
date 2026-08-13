@@ -12,7 +12,6 @@ import {
   DollarSign
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { api } from "../lib/apiClient";
 import type { Booking } from "../lib/apiClient";
 
 interface Lead {
@@ -27,7 +26,7 @@ interface Lead {
   summary: string;
 }
 
-export default function InteractiveDashboard({ triggerRefresh }: { triggerRefresh?: number }) {
+export default function InteractiveDashboard({ newBooking }: { newBooking?: Booking | null }) {
   const [activeTab, setActiveTab] = useState<"overview" | "leads" | "workflows">("overview");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [leadsList, setLeadsList] = useState<Lead[]>([
@@ -66,39 +65,24 @@ export default function InteractiveDashboard({ triggerRefresh }: { triggerRefres
     }
   ]);
 
-  // Read local bookings and dynamically inject them into the dashboard!
+  // When the visitor completes a booking in this session, reflect it in the
+  // dashboard immediately. No network call — the data comes straight from
+  // the booking response, so no other visitor's data is ever fetched here.
   useEffect(() => {
-    const fetchLocalBookings = async () => {
-      try {
-        const bookings = await api.getBookings();
-        if (bookings && bookings.length > 0) {
-          const formattedBookings: Lead[] = bookings.map((b: Booking, index: number) => ({
-            id: b.id || `BK-${index}`,
-            name: b.name,
-            email: b.email,
-            company: b.company || "Independent",
-            status: "Booked",
-            source: "Book Demo Form",
-            time: "Just now",
-            value: "$9,600/yr",
-            summary: `Qualified Lead: Interested in premium AI solutions. Scheduled for ${b.date} at ${b.time}. Notes: ${b.notes || "None"}`
-          }));
-
-          // Merge with existing but prevent duplicates
-          setLeadsList(prev => {
-            const filteredPrev = prev.filter(p => !formattedBookings.some(fb => fb.name === p.name));
-            return [...formattedBookings, ...filteredPrev];
-          });
-        }
-      } catch {
-        // Dashboard works fine with seed data when API is unreachable
-      }
+    if (!newBooking) return;
+    const formatted: Lead = {
+      id: newBooking.id,
+      name: newBooking.name,
+      email: newBooking.email,
+      company: newBooking.company || "Independent",
+      status: "Booked",
+      source: "Book Demo Form",
+      time: "Just now",
+      value: "$9,600/yr",
+      summary: `Qualified Lead: Interested in premium AI solutions. Scheduled for ${newBooking.date} at ${newBooking.time}. Notes: ${newBooking.notes || "None"}`,
     };
-
-    fetchLocalBookings();
-    const interval = setInterval(fetchLocalBookings, 5000);
-    return () => clearInterval(interval);
-  }, [triggerRefresh]);
+    setLeadsList((prev) => [formatted, ...prev.filter((p) => p.id !== formatted.id)]);
+  }, [newBooking]);
 
   return (
     <div className="w-full bg-white border border-brand-slate-200 rounded-2xl shadow-xl overflow-hidden font-sans text-brand-navy">

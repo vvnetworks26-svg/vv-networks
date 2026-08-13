@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { withBusiness } from "../middleware.js";
+import { authenticate } from "../auth.middleware.js";
 import { validateBody, validateQuery } from "../validate.js";
-import billingRouter from "./billing.js";
 import operationsRouter from "./operations.js";
 
 // Schemas
@@ -12,8 +12,6 @@ import {
   createConversationSchema, updateConversationSchema, createMessageSchema,
   createAppointmentSchema, updateAppointmentSchema,
   createContactRequestSchema, updateContactRequestSchema,
-  createProjectSchema, updateProjectSchema,
-  createInvoiceSchema, updateInvoiceSchema,
   createServiceSchema, updateServiceSchema,
   createWidgetSessionSchema, updateWidgetSessionSchema,
 } from "../schemas.js";
@@ -36,14 +34,6 @@ import {
   getUpcoming, getAppointmentStatsHandler,
 } from "../controllers/appointments.controller.js";
 import {
-  listProjects, getProject, createProjectHandler, updateProjectHandler,
-  deleteProjectHandler, restoreProjectHandler, getProjectStatsHandler,
-} from "../controllers/projects.controller.js";
-import {
-  listInvoices, getInvoice, createInvoiceHandler, updateInvoiceHandler,
-  deleteInvoiceHandler, listOverdueInvoices,
-} from "../controllers/invoices.controller.js";
-import {
   listServices, getService, createServiceHandler, updateServiceHandler, deleteServiceHandler,
 } from "../controllers/services.controller.js";
 import { getAnalytics, getTimeline, getEvents } from "../controllers/analytics.controller.js";
@@ -57,7 +47,21 @@ import {
 
 const v1 = Router();
 
-// All v1 routes require business context
+// PUBLIC: the live contact form (BookingForm.tsx) posts here with no auth
+// token. Registered before v1.use(authenticate) below so Express matches it
+// first and it never hits the auth gate. It still needs business context
+// (getBid in the controller), so withBusiness is attached directly to this
+// one route rather than via the router-wide v1.use(withBusiness) below.
+v1.post("/contact-requests", withBusiness, validateBody(createContactRequestSchema), createContactRequestHandler);
+
+// SECURITY: gate for the internal CRM API. Everything registered below this
+// line requires a valid JWT (see auth.middleware.ts) — checked before any
+// database access, so an unauthenticated call is rejected without touching
+// Mongo. Without this, business, users, leads, conversations, appointments,
+// services, analytics, and widget-sessions were reachable with no token at all.
+v1.use(authenticate);
+
+// Business context for every authenticated route below.
 v1.use(withBusiness);
 
 // ── Business ──────────────────────────────────────────────────────────────────
@@ -68,7 +72,10 @@ v1.patch ("/business",        validateBody(updateBusinessSchema), updateBusiness
 v1.get   ("/users",                                          listUsers);
 v1.get   ("/users/:id",                                      getUser);
 v1.post  ("/users",           validateBody(createUserSchema),    createUser);
-v1.patch ("/users/:id",       validateBody(updateUserSchema),    updateUser);
+// SECURITY: authenticate() is required here so updateUser (users.controller.ts)
+// can identify the caller — it enforces that only owner/admin may change
+// another user's `role`, and that nobody may ever change their own `role`.
+v1.patch ("/users/:id",       authenticate, validateBody(updateUserSchema),    updateUser);
 v1.delete("/users/:id",                                      deleteUser);
 
 // ── Leads ────────────────────────────────────────────────────────────────────
@@ -100,23 +107,6 @@ v1.post  ("/appointments",    validateBody(createAppointmentSchema), createAppoi
 v1.patch ("/appointments/:id", validateBody(updateAppointmentSchema), updateAppointmentHandler);
 v1.delete("/appointments/:id",                               deleteAppointmentHandler);
 
-// ── Projects ──────────────────────────────────────────────────────────────────
-v1.get   ("/projects/stats",                                 getProjectStatsHandler);
-v1.get   ("/projects",                                       listProjects);
-v1.get   ("/projects/:id",                                   getProject);
-v1.post  ("/projects",        validateBody(createProjectSchema),  createProjectHandler);
-v1.patch ("/projects/:id",    validateBody(updateProjectSchema),  updateProjectHandler);
-v1.delete("/projects/:id",                                   deleteProjectHandler);
-v1.post  ("/projects/:id/restore",                           restoreProjectHandler);
-
-// ── Invoices ──────────────────────────────────────────────────────────────────
-v1.get   ("/invoices/overdue",                               listOverdueInvoices);
-v1.get   ("/invoices",                                       listInvoices);
-v1.get   ("/invoices/:id",                                   getInvoice);
-v1.post  ("/invoices",        validateBody(createInvoiceSchema),  createInvoiceHandler);
-v1.patch ("/invoices/:id",    validateBody(updateInvoiceSchema),  updateInvoiceHandler);
-v1.delete("/invoices/:id",                                   deleteInvoiceHandler);
-
 // ── Services ──────────────────────────────────────────────────────────────────
 v1.get   ("/services",                                       listServices);
 v1.get   ("/services/:id",                                   getService);
@@ -130,9 +120,9 @@ v1.get   ("/analytics/timeline",                             getTimeline);
 v1.get   ("/analytics/events",                               getEvents);
 
 // ── Contact Requests ──────────────────────────────────────────────────────────
+// POST is registered above, before v1.use(authenticate), and stays public.
 v1.get   ("/contact-requests",                               listContactRequests);
 v1.get   ("/contact-requests/:id",                           getContactRequest);
-v1.post  ("/contact-requests", validateBody(createContactRequestSchema), createContactRequestHandler);
 v1.patch ("/contact-requests/:id", validateBody(updateContactRequestSchema), updateContactRequestHandler);
 v1.delete("/contact-requests/:id",                           deleteContactRequestHandler);
 
@@ -140,9 +130,6 @@ v1.delete("/contact-requests/:id",                           deleteContactReques
 v1.get   ("/widget-sessions",                                listWidgetSessions);
 v1.post  ("/widget-sessions", validateBody(createWidgetSessionSchema), createWidgetSession);
 v1.patch ("/widget-sessions/:id", validateBody(updateWidgetSessionSchema), updateWidgetSession);
-
-// ── Billing (Phase I.5) ───────────────────────────────────────────────────────
-v1.use(billingRouter);
 
 // ── Operations (Phase I.7) ────────────────────────────────────────────────────
 v1.use(operationsRouter);

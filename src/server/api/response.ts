@@ -46,6 +46,10 @@ export function notFound(res: Response, resource = "Resource"): Response {
   return res.status(404).json({ success: false, error: `${resource} not found` } satisfies ApiError);
 }
 
+export function forbidden(res: Response, error = "Insufficient permissions"): Response {
+  return res.status(403).json({ success: false, error, code: "FORBIDDEN" } satisfies ApiError);
+}
+
 export function badRequest(res: Response, error: string, fields?: Record<string, string[]>): Response {
   return res.status(400).json({ success: false, error, ...(fields ? { fields } : {}) } satisfies ApiError);
 }

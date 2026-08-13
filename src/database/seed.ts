@@ -13,8 +13,6 @@ import { Message } from "./models/Message.js";
 import { Appointment } from "./models/Appointment.js";
 import { AnalyticsEvent } from "./models/AnalyticsEvent.js";
 import { Service } from "./models/Service.js";
-import { Project } from "./models/Project.js";
-import { Invoice } from "./models/Invoice.js";
 import { ContactRequest } from "./models/ContactRequest.js";
 import { WidgetSession } from "./models/WidgetSession.js";
 import crypto from "crypto";
@@ -45,8 +43,8 @@ async function seed(): Promise<void> {
   await Promise.all([
     Business.deleteMany({}), User.deleteMany({}), Lead.deleteMany({}),
     Conversation.deleteMany({}), Message.deleteMany({}), Appointment.deleteMany({}),
-    AnalyticsEvent.deleteMany({}), Service.deleteMany({}), Project.deleteMany({}),
-    Invoice.deleteMany({}), ContactRequest.deleteMany({}), WidgetSession.deleteMany({}),
+    AnalyticsEvent.deleteMany({}), Service.deleteMany({}),
+    ContactRequest.deleteMany({}), WidgetSession.deleteMany({}),
   ]);
   console.info("[Seed] Collections cleared.");
 
@@ -56,7 +54,7 @@ async function seed(): Promise<void> {
     slug: "vv-networks",
     email: "vvnetworks26@gmail.com",
     phone: "+1 602 555 0100",
-    website: "https://vvnetworks.io",
+    website: "https://vvnetworks.co.in",
     industry: "AI Software",
     plan: "growth",
     status: "active",
@@ -68,9 +66,9 @@ async function seed(): Promise<void> {
 
   // ── 2. Users (3) ─────────────────────────────────────────────
   const users = await User.insertMany([
-    { businessId: business._id, name: "Alex Vargas", email: "alex@vvnetworks.io", role: "owner", isActive: true },
-    { businessId: business._id, name: "Jordan Smith", email: "jordan@vvnetworks.io", role: "admin", isActive: true },
-    { businessId: business._id, name: "Riley Chen", email: "riley@vvnetworks.io", role: "agent", isActive: true },
+    { businessId: business._id, name: "Alex Vargas", email: "alex@vvnetworks.co.in", role: "owner", isActive: true },
+    { businessId: business._id, name: "Jordan Smith", email: "jordan@vvnetworks.co.in", role: "admin", isActive: true },
+    { businessId: business._id, name: "Riley Chen", email: "riley@vvnetworks.co.in", role: "agent", isActive: true },
   ]);
   console.info(`[Seed] Users: ${users.length}`);
 
@@ -162,74 +160,7 @@ async function seed(): Promise<void> {
   await Appointment.insertMany(apptDocs);
   console.info("[Seed] Appointments: 10");
 
-  // ── 7. Projects (3) ──────────────────────────────────────────
-  const projects = await Project.insertMany([
-    {
-      businessId: business._id, clientId: leads[0]._id, managedBy: users[0]._id,
-      name: "Peak Growth — LeadFlow Deployment", type: "leadflow", status: "active",
-      totalValue: 4500, paidValue: 2250, startDate: daysAgo(14), targetDeliveryDate: futureDays(7),
-      milestones: [
-        { title: "Widget configuration", value: 1500, paid: true, completedAt: daysAgo(10) },
-        { title: "Calendar integration", value: 1500, paid: true, completedAt: daysAgo(5) },
-        { title: "Dashboard setup & training", value: 1500, paid: false, dueDate: futureDays(7) },
-      ],
-    },
-    {
-      businessId: business._id, clientId: leads[1]._id, managedBy: users[1]._id,
-      name: "Vance Roofing — Custom CRM", type: "custom-software", status: "discovery",
-      totalValue: 12000, paidValue: 0, startDate: daysAgo(3), targetDeliveryDate: futureDays(60),
-      milestones: [
-        { title: "Discovery & architecture", value: 3000, paid: false, dueDate: futureDays(7) },
-        { title: "Development sprint 1", value: 4500, paid: false, dueDate: futureDays(35) },
-        { title: "Testing & launch", value: 4500, paid: false, dueDate: futureDays(60) },
-      ],
-    },
-    {
-      businessId: business._id, clientId: leads[2]._id, managedBy: users[0]._id,
-      name: "Nordic Lodges — Booking Assistant", type: "ai-automation", status: "completed",
-      totalValue: 8500, paidValue: 8500, completedAt: daysAgo(20),
-      milestones: [
-        { title: "AI agent configuration", value: 3000, paid: true },
-        { title: "Multi-lingual testing", value: 2500, paid: true },
-        { title: "Production deployment", value: 3000, paid: true },
-      ],
-    },
-  ]);
-  console.info(`[Seed] Projects: ${projects.length}`);
-
-  // ── 8. Invoices (4) ──────────────────────────────────────────
-  await Invoice.insertMany([
-    {
-      businessId: business._id, projectId: projects[0]._id, clientId: leads[0]._id,
-      invoiceNumber: "INV-0001", status: "paid",
-      lineItems: [{ description: "LeadFlow setup — milestone 1 & 2", quantity: 1, unitPrice: 3000, total: 3000 }],
-      subtotal: 3000, taxRate: 0, taxAmount: 0, total: 3000,
-      issuedAt: daysAgo(12), dueAt: daysAgo(5), paidAt: daysAgo(4),
-    },
-    {
-      businessId: business._id, projectId: projects[0]._id, clientId: leads[0]._id,
-      invoiceNumber: "INV-0002", status: "sent",
-      lineItems: [{ description: "LeadFlow setup — milestone 3 (dashboard & training)", quantity: 1, unitPrice: 1500, total: 1500 }],
-      subtotal: 1500, taxRate: 0, taxAmount: 0, total: 1500,
-      issuedAt: daysAgo(1), dueAt: futureDays(14),
-    },
-    {
-      businessId: business._id, projectId: projects[2]._id, clientId: leads[2]._id,
-      invoiceNumber: "INV-0003", status: "paid",
-      lineItems: [{ description: "Nordic Lodges — full project", quantity: 1, unitPrice: 8500, total: 8500 }],
-      subtotal: 8500, taxRate: 0, taxAmount: 0, total: 8500,
-      issuedAt: daysAgo(25), dueAt: daysAgo(18), paidAt: daysAgo(20),
-    },
-    {
-      businessId: business._id, projectId: projects[1]._id, clientId: leads[1]._id,
-      invoiceNumber: "INV-0004", status: "draft",
-      lineItems: [{ description: "Vance Roofing CRM — discovery phase", quantity: 1, unitPrice: 3000, total: 3000 }],
-      subtotal: 3000, taxRate: 0, taxAmount: 0, total: 3000,
-    },
-  ]);
-  console.info("[Seed] Invoices: 4");
-
-  // ── 9. Analytics (90-day history) ────────────────────────────
+  // ── 7. Analytics (90-day history) ────────────────────────────
   const events = ["widget:opened","conversation:started","message:sent","qualification:updated","lead:captured","appointment:requested","demo:requested","page_view","cta_clicked"] as const;
   const analyticsInserts = Array.from({ length: 270 }, (_, i) => ({
     businessId: business._id,
@@ -240,7 +171,7 @@ async function seed(): Promise<void> {
   await AnalyticsEvent.insertMany(analyticsInserts);
   console.info(`[Seed] Analytics events: ${analyticsInserts.length}`);
 
-  // ── 10. Contact requests (5) ─────────────────────────────────
+  // ── 8. Contact requests (5) ──────────────────────────────────
   const crDocs = Array.from({ length: 5 }, (_, i) => {
     const { first, last } = randomName();
     return {
@@ -261,7 +192,7 @@ async function seed(): Promise<void> {
   await ContactRequest.insertMany(crDocs);
   console.info("[Seed] Contact requests: 5");
 
-  // ── 11. Widget sessions (10) ──────────────────────────────────
+  // ── 9. Widget sessions (10) ──────────────────────────────────
   const sessionDocs = Array.from({ length: 10 }, (_, i) => ({
     businessId: business._id,
     leadId: i < 6 ? leads[i]._id : undefined,
@@ -279,8 +210,8 @@ async function seed(): Promise<void> {
   console.info("\n✅ Seed complete.");
   console.info(`   Business: 1  |  Users: ${users.length}  |  Leads: ${leads.length}`);
   console.info(`   Conversations: ${conversations.length}  |  Messages: ${messageInserts.length}`);
-  console.info(`   Appointments: 10  |  Projects: ${projects.length}  |  Invoices: 4`);
-  console.info(`   Analytics events: ${analyticsInserts.length}  |  Contact requests: 5  |  Widget sessions: 10`);
+  console.info(`   Appointments: 10  |  Analytics events: ${analyticsInserts.length}`);
+  console.info(`   Contact requests: 5  |  Widget sessions: 10`);
 
   await mongoose.connection.close();
   process.exit(0);

@@ -40,15 +40,17 @@ services:
       - key: MONGODB_URI
         sync: false                # set in Render dashboard — never commit
 
-      # ── Stripe ────────────────────────────────────────────────────────────
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-
       # ── AI ────────────────────────────────────────────────────────────────
       - key: GEMINI_API_KEY
         sync: false
+
+      # ── Email notifications ─────────────────────────────────────────────────
+      - key: RESEND_API_KEY
+        sync: false
+      - key: NOTIFY_EMAIL_TO
+        value: vvnetworks26@gmail.com
+      - key: NOTIFY_EMAIL_FROM
+        sync: false                # e.g. "VV Networks <notifications@vvnetworks.co.in>" — must be a verified Resend domain
 
       # ── Logging ───────────────────────────────────────────────────────────
       - key: LOG_LEVEL

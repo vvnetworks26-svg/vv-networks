@@ -9,8 +9,6 @@
  *   cleanup:widget-sessions   — daily
  *   cleanup:audit-logs        — daily
  *   analytics:aggregation     — hourly
- *   billing:invoice-reminders — daily
- *   billing:subscription-check— daily
  *   ops:backup-reminder       — daily
  */
 
@@ -256,52 +254,6 @@ export function registerJobs(): void {
       const count = await AnalyticsEvent.countDocuments({ createdAt: { $gte: since } });
       metricsService.setGauge("analytics.events.last_hour", count);
       logger.info("[Job] Analytics aggregated", { eventsLastHour: count });
-    },
-  });
-
-  schedulerService.register({
-    id:          "billing:invoice-reminders",
-    name:        "Invoice Reminders",
-    description: "Sends reminder notifications for overdue invoices",
-    interval:    "daily",
-    maxRetries:  3,
-    enabled:     true,
-    handler: async () => {
-      const { Invoice } = await import("../../database/models/Invoice.js");
-      const overdue = await Invoice.find({
-        status:    "sent",
-        dueAt:     { $lt: new Date() },
-        deletedAt: null,
-      }).select("_id businessId invoiceNumber total").exec();
-      logger.info("[Job] Invoice reminders check", { overdueCount: overdue.length });
-      // Future: send email reminders via email.service
-    },
-  });
-
-  schedulerService.register({
-    id:          "billing:subscription-check",
-    name:        "Subscription Renewal Check",
-    description: "Checks for subscriptions due for renewal and updates grace period status",
-    interval:    "daily",
-    maxRetries:  2,
-    enabled:     true,
-    handler: async () => {
-      const { Subscription } = await import("../../database/models/Subscription.js");
-      const now = new Date();
-      // Expire grace periods
-      const expired = await Subscription.updateMany(
-        { status: "grace_period", gracePeriodEndsAt: { $lt: now }, deletedAt: null },
-        { status: "expired" }
-      );
-      // Flag subscriptions due to cancel at period end
-      const cancelled = await Subscription.updateMany(
-        { cancelAtPeriodEnd: true, currentPeriodEnd: { $lt: now }, deletedAt: null },
-        { status: "cancelled", cancelledAt: now }
-      );
-      logger.info("[Job] Subscription check complete", {
-        expired:   expired.modifiedCount,
-        cancelled: cancelled.modifiedCount,
-      });
     },
   });
 
