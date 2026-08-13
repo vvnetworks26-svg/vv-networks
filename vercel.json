@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://vv-networks-api.onrender.com/api/$1"
+      "destination": "https://vv-networks.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
