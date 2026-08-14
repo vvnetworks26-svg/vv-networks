@@ -12,12 +12,12 @@
  * Production (Vercel frontend + Render backend):
  *   VITE_API_URL is "" (not needed — Vercel proxies the request)
  *   Browser sends: POST https://your-app.vercel.app/api/leadflow/chat
- *   vercel.json rewrite: /api/(.*) → https://vv-networks-api.onrender.com/api/$1
+ *   vercel.json rewrite: /api/(.*) → https://vv-networks.onrender.com/api/$1
  *   Vercel proxies to Render server-side → no CORS issues.
  *
  * If VITE_API_URL is explicitly set (e.g. direct Render testing):
- *   BASE_URL = "https://vv-networks-api.onrender.com"
- *   Browser sends: POST https://vv-networks-api.onrender.com/api/leadflow/chat
+ *   BASE_URL = "https://vv-networks.onrender.com"
+ *   Browser sends: POST https://vv-networks.onrender.com/api/leadflow/chat
  *   CORS_ORIGIN on Render must include the Vercel domain.
  */
 import { env } from "./environment";

@@ -13,7 +13,7 @@ Copy `.env.example` to `.env` for local development.
 | `PORT` | optional | `3000` | HTTP server port |
 | `APP_NAME` | optional | `vv-networks` | Service identifier in logs |
 | `APP_VERSION` | optional | `0.0.0` | Semantic version, injected by CI |
-| `APP_URL` | production | — | Public URL, e.g. `https://vv-networks-api.onrender.com` |
+| `APP_URL` | production | — | Public URL, e.g. `https://vv-networks.onrender.com` |
 | `GIT_COMMIT` | optional | `local` | Git SHA, injected by CI |
 
 ---

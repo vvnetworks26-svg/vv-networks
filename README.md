@@ -81,7 +81,7 @@ npm run dev
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VITE_API_URL` | Yes (prod) | Full URL of the Render backend, e.g. `https://vv-networks-api.onrender.com` |
+| `VITE_API_URL` | Yes (prod) | Full URL of the Render backend, e.g. `https://vv-networks.onrender.com` |
 
 > **Development:** Leave `VITE_API_URL` empty — the Vite dev server and Express run on the same port, so `/api/*` routes resolve automatically.
 
@@ -98,7 +98,7 @@ npm run dev
    - **Build Command:** `npm install && npm run build:server`
    - **Start Command:** `npm start`
    - **Environment:** Add `GEMINI_API_KEY` and `CORS_ORIGIN` in the Render dashboard
-5. Copy the service URL (e.g. `https://vv-networks-api.onrender.com`)
+5. Copy the service URL (e.g. `https://vv-networks.onrender.com`)
 
 ### Frontend → Vercel
 
