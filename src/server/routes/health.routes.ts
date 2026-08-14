@@ -11,7 +11,7 @@ router.get("/", (_req, res) => {
 
   res.json({
     status: "ok",
-    service: "vv-networks-api",
+    service: "vv-networks",
     env: config.nodeEnv,
     gemini: config.geminiApiKey ? "configured" : "missing",
     database: {

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: vv-networks-api
+    name: vv-networks
     runtime: node
     region: oregon
     plan: starter                  # upgrade from free for zero-sleep
