@@ -93,7 +93,7 @@ unhealthy, using this service's own `healthCheckPath: /api/ready`
 1. In the Render Dashboard, go to your **workspace home → Integrations → Notifications** (left sidebar).
 2. Choose a notification destination: **Email**, **Slack**, or both. For Slack, click **Connect Slack** first and authorize your workspace.
 3. Set the notification level to **"Only failure notifications"** — this covers "a running service becomes unhealthy" (health check starts failing on a live service), not just deploy failures.
-4. Optional: to override this for just the `vv-networks-api` service instead of the whole workspace, go to that service's **Settings → Notifications** and pick something other than "Use workspace default."
+4. Optional: to override this for just the `vv-networks` service instead of the whole workspace, go to that service's **Settings → Notifications** and pick something other than "Use workspace default."
 
 **What it catches:** the Render service itself crashing, running out of memory, or failing its own `/api/ready` health check.
 **What it does NOT catch:** anything upstream of Render — DNS issues, Cloudflare, or (as in this incident) `vercel.json`'s rewrite pointing at the wrong hostname entirely. From Render's own perspective, a misrouted rewrite isn't "this service is unhealthy" — the service Render is watching may be perfectly healthy while traffic never reaches it.

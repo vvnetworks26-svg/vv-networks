@@ -122,7 +122,7 @@ Indexes are auto-created at startup via `ensureIndexes()`. No manual migration n
 
 ## Staging environment
 
-1. Create a second Render service `vv-networks-api-staging`
+1. Create a second Render service `vv-networks-staging`
 2. Point to `staging` branch
 3. Use test Stripe keys (`sk_test_...`)
 4. Use a separate MongoDB Atlas database (`vv-networks-staging`)
