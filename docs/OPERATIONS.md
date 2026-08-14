@@ -64,8 +64,8 @@ import('./src/database/index.js').then(m => m.ensureIndexes()).then(() => proces
 ### Check environment health
 
 ```bash
-curl https://vv-networks-api.onrender.com/api/health | jq .
-curl https://vv-networks-api.onrender.com/api/metrics | jq .
+curl https://vv-networks.onrender.com/api/health | jq .
+curl https://vv-networks.onrender.com/api/metrics | jq .
 ```
 
 ### View structured logs
@@ -81,7 +81,7 @@ Filter by correlation ID:
 ### Manual payment refund
 
 ```bash
-curl -X POST https://vv-networks-api.onrender.com/api/v1/payments/:id/refund \
+curl -X POST https://vv-networks.onrender.com/api/v1/payments/:id/refund \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"reason": "Customer request"}'
@@ -90,7 +90,7 @@ curl -X POST https://vv-networks-api.onrender.com/api/v1/payments/:id/refund \
 ### Cancel subscription immediately
 
 ```bash
-curl -X POST https://vv-networks-api.onrender.com/api/v1/subscriptions/:id/cancel \
+curl -X POST https://vv-networks.onrender.com/api/v1/subscriptions/:id/cancel \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"atPeriodEnd": false}'

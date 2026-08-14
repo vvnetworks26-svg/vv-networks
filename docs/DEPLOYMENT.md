@@ -38,7 +38,7 @@ vercel
 
 | Variable | Value |
 |---|---|
-| `VITE_API_URL` | `https://vv-networks-api.onrender.com` |
+| `VITE_API_URL` | `https://vv-networks.onrender.com` |
 | `VITE_APP_VERSION` | injected by CI (`${{ github.sha }}`) |
 
 ### Domain setup
@@ -106,7 +106,7 @@ Indexes are auto-created at startup via `ensureIndexes()`. No manual migration n
 ### Webhook setup
 
 1. Stripe dashboard → Developers → Webhooks → Add endpoint
-2. URL: `https://vv-networks-api.onrender.com/api/webhooks/stripe`
+2. URL: `https://vv-networks.onrender.com/api/webhooks/stripe`
 3. Events to select:
    - `checkout.session.completed`
    - `invoice.paid`
