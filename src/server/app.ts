@@ -8,6 +8,7 @@ import { connectDatabase, ensureIndexes } from "../database/index.js";
 import { requestLogger } from "./middleware/request-logger.js";
 import { globalErrorHandler } from "./middleware/error-handler.js";
 import { maintenanceGuard } from "./middleware/maintenance.js";
+import { notFound } from "./api/response.js";
 import logger from "./logger.js";
 
 // Routes
@@ -100,6 +101,16 @@ export function createApp() {
   // ── REST API v1 ───────────────────────────────────────────────────────────
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1",      v1Router);
+
+  // ── API 404 ───────────────────────────────────────────────────────────────
+  // Must come after every real /api/* route above and before the SPA fallback
+  // (server.ts's `app.get("*", ...)` in production). Without this, an
+  // unmatched /api/* request (wrong method, typo'd path, a route that was
+  // intentionally removed) falls through the SPA catch-all and gets served
+  // index.html with a 200 instead of a real 404.
+  app.all("/api/*", (_req, res) => {
+    notFound(res, "Route");
+  });
 
   // ── Global error handler (must be last) ──────────────────────────────────
   app.use(globalErrorHandler);
