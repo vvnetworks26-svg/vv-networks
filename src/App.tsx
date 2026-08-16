@@ -145,7 +145,7 @@ function AppInner() {
   }, []);
 
   /* ── Animated headline words ── */
-  const headlineWords = ["Engineering", "Intelligence", "for Service", "Growth."];
+  const headlineWords = ["Stop asking leads", "to fill out forms.", "Start demonstrating", "instant value."];
 
   const faqs = [
     {
@@ -269,12 +269,12 @@ function AppInner() {
                 {headlineWords.map((word, i) => (
                   <motion.span
                     key={word}
-                    className={`block ${i === 1 ? "" : ""}`}
+                    className="block"
                     initial={{ opacity: 0, y: shouldReduce ? 0 : 28 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, delay: shouldReduce ? 0 : 0.15 + i * 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
                   >
-                    {i === 1 ? <GradientWord>{word}</GradientWord> : word}
+                    {i >= 2 ? <GradientWord>{word}</GradientWord> : word}
                   </motion.span>
                 ))}
               </h1>

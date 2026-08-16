@@ -1,0 +1,155 @@
+<!doctype html>
+<!--
+  Source template for public/og-image.png (1200x630, OG/Twitter card size).
+
+  This is a one-off asset generator, deliberately not wired into `npm run build` —
+  the image only changes when the hero copy changes. No image tooling is added as a
+  dependency; regeneration uses the system Chrome that is already installed.
+
+  Regenerate:
+
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+      --headless=new --disable-gpu --hide-scrollbars \
+      --window-size=1200,630 --default-background-color=00000000 \
+      --virtual-time-budget=10000 \
+      --screenshot=public/og-image.png \
+      "file://$PWD/tools/og-image/og-image.html"
+
+  Headline copy must match the live hero h1 in src/App.tsx (`headlineWords`).
+  Sentence 1 renders white; sentence 2 renders in the brand gradient, mirroring
+  the hero's GradientWord treatment.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-navy:      #090D1A;
+      --brand-blue:      #2563EB;
+      --brand-indigo:    #4F46E5;
+      --brand-violet:    #8B5CF6;
+      --brand-slate-300: #CBD5E1;
+      --brand-slate-400: #94A3B8;
+      --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { width: 1200px; height: 630px; }
+
+    body {
+      position: relative;
+      overflow: hidden;
+      font-family: var(--font-sans);
+      background:
+        radial-gradient(900px 520px at 76% 16%, rgba(37, 99, 235, 0.38), transparent 62%),
+        radial-gradient(720px 520px at 6% 94%, rgba(139, 92, 246, 0.26), transparent 62%),
+        #070B16;
+    }
+
+    .card {
+      position: absolute;
+      inset: 0;
+      padding: 76px 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* ── Logo lockup ───────────────────────────────────────────── */
+    .brand { display: flex; align-items: center; gap: 22px; }
+
+    .mark {
+      width: 74px;
+      height: 74px;
+      border-radius: 18px;
+      background: var(--brand-blue);
+      color: #fff;
+      font-weight: 800;
+      font-size: 42px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-name {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      color: var(--brand-slate-400);
+      margin-top: 4px;
+    }
+
+    /* ── Headline ──────────────────────────────────────────────── */
+    .headline {
+      font-size: 62px;
+      font-weight: 800;
+      line-height: 1.14;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    /* One span per line, mirroring the hero's `headlineWords` array in App.tsx. */
+    .headline .line { display: block; }
+
+    .headline .accent {
+      background: linear-gradient(90deg, #3B82F6 0%, var(--brand-indigo) 55%, var(--brand-violet) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .tagline {
+      font-size: 25px;
+      font-weight: 500;
+      color: var(--brand-slate-400);
+      letter-spacing: -0.005em;
+    }
+
+    /* ── Bottom accent bar ─────────────────────────────────────── */
+    .bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 9px;
+      background: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-indigo) 50%, var(--brand-violet) 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="mark">V</div>
+      <div>
+        <div class="brand-name">VV NETWORKS</div>
+        <div class="brand-sub">AI PRODUCT STUDIO</div>
+      </div>
+    </div>
+
+    <h1 class="headline">
+      <span class="line">Stop asking leads</span>
+      <span class="line">to fill out forms.</span>
+      <span class="line accent">Start demonstrating</span>
+      <span class="line accent">instant value.</span>
+    </h1>
+
+    <div class="tagline">LeadFlow AI &middot; Custom Software &middot; Web Development</div>
+  </div>
+  <div class="bar"></div>
+</body>
+</html>
