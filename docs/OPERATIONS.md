@@ -103,13 +103,13 @@ content changes, instead of waiting for their normal crawl schedule. (Google doe
 not participate.)
 
 Key file — must stay reachable, do not delete or rename:
-`public/676d6093784afbbe32f1358364169d7e.txt` →
-https://www.vvnetworks.co.in/676d6093784afbbe32f1358364169d7e.txt
+`public/0aed9364f743506c3f4426150a8b5818.txt` →
+https://www.vvnetworks.co.in/0aed9364f743506c3f4426150a8b5818.txt
 
 After a significant content change (new pages, substantially rewritten copy), ping:
 
 ```bash
-curl "https://api.indexnow.org/indexnow?url=https://www.vvnetworks.co.in&key=676d6093784afbbe32f1358364169d7e&keyLocation=https://www.vvnetworks.co.in/676d6093784afbbe32f1358364169d7e.txt"
+curl "https://api.indexnow.org/indexnow?url=https://www.vvnetworks.co.in&key=0aed9364f743506c3f4426150a8b5818&keyLocation=https://www.vvnetworks.co.in/0aed9364f743506c3f4426150a8b5818.txt"
 ```
 
 A `200` or `202` means accepted. Ping only on real changes — not every deploy.
