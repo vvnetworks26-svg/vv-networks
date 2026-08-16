@@ -96,6 +96,24 @@ curl -X POST https://vv-networks.onrender.com/api/v1/subscriptions/:id/cancel \
   -d '{"atPeriodEnd": false}'
 ```
 
+### IndexNow — request a faster recrawl
+
+IndexNow notifies Bing, Yandex, and other participating engines immediately when
+content changes, instead of waiting for their normal crawl schedule. (Google does
+not participate.)
+
+Key file — must stay reachable, do not delete or rename:
+`public/676d6093784afbbe32f1358364169d7e.txt` →
+https://www.vvnetworks.co.in/676d6093784afbbe32f1358364169d7e.txt
+
+After a significant content change (new pages, substantially rewritten copy), ping:
+
+```bash
+curl "https://api.indexnow.org/indexnow?url=https://www.vvnetworks.co.in&key=676d6093784afbbe32f1358364169d7e&keyLocation=https://www.vvnetworks.co.in/676d6093784afbbe32f1358364169d7e.txt"
+```
+
+A `200` or `202` means accepted. Ping only on real changes — not every deploy.
+
 ---
 
 ## Incident Response
